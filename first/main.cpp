@@ -32,20 +32,20 @@ vec3 color(const ray& r, hitable* world, int depth)
 
 int main()
 {
-    int nx = 800;
-    int ny = 400;
-    int ns = 200;
+    int nx = 400;
+    int ny = 200;
+    int ns = 50;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
     hitable* list[4];
-    list[0] = new sphere(vec3(0,0,-2), 0.5, new lambertian(vec3(0.8f, 0.3f, 0.3f)));
-    list[1] = new sphere(vec3(0,-100.5,-2), 100, new lambertian(vec3(0.8f, 0.8f, 0.0f)));
-    list[2] = new sphere(vec3(1,0,-2), 0.5, new metal(vec3(0.8f, 0.6f, 0.2f), 0.3));
-    list[3] = new sphere(vec3(-1,0,-2), 0.5, new dielectric(1.5));
-    list[3] = new sphere(vec3(-1,0,-2), -0.49, new dielectric(1.5));
+    list[0] = new sphere(vec3(0,0,-1), 0.5, new lambertian(vec3(0.8f, 0.3f, 0.3f)));
+    list[1] = new sphere(vec3(0,-100.5,-1), 100, new lambertian(vec3(0.8f, 0.8f, 0.0f)));
+    list[2] = new sphere(vec3(1,0,-1), 0.5, new metal(vec3(0.8f, 0.6f, 0.2f), 0.3));
+    list[3] = new sphere(vec3(-1,0,-1), 0.5, new dielectric(1.5));
+    list[3] = new sphere(vec3(-1,0,-1), -0.49, new dielectric(1.5));
     hitable* world = new hitable_list(list, 4);
 
-    camera cam;
+    camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 45, float(nx)/float(ny));
 
     for(int j = ny-1 ; j >= 0 ; j--)
     {
