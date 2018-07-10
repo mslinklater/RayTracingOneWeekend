@@ -27,4 +27,8 @@ HEADERS += \
     material.h \
     moving_sphere.h \
     aabb.h \
-    bvh.h
+    bvh.h \
+    texture.h \
+    perlin.h \
+    surface_texture.h \
+    stb_image.h

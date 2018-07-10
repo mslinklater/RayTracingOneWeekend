@@ -6,6 +6,10 @@
 #include "camera.h"
 #include "material.h"
 #include "bvh.h"
+#include "surface_texture.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 vec3 color(const ray& r, hitable* world, int depth)
 {
@@ -28,14 +32,57 @@ vec3 color(const ray& r, hitable* world, int depth)
     {
         vec3 unit_direction = unit_vector(r.direction());
         float t = 0.5 * (unit_direction.y() + 1.0);
-        return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
+        return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.2, 0.2, 0.2);
     }
+}
+
+hitable* six_balls()
+{
+#if 0
+    hitable* list[6];
+    list[0] = new sphere(vec3(0,0,0), 0.5, new lambertian(vec3(0.8f, 0.3f, 0.3f)));
+    list[1] = new sphere(vec3(0,-100.5,0), 100, new lambertian(vec3(0.5f, 0.5f, 0.5f)));
+    list[2] = new sphere(vec3(1,0,0), 0.5, new metal(vec3(0.8f, 0.6f, 0.2f), 0.3));
+    list[3] = new sphere(vec3(-1,0,0), 0.5, new dielectric(1.5));
+    list[4] = new sphere(vec3(-2,0,0), 0.5, new metal(vec3(0.8f, 0.6f, 0.2f), 0.3));
+    list[5] = new sphere(vec3(2,0,0), 0.5, new dielectric(1.5));
+    return new hitable_list(list, 6);
+#endif
+    return 0;
+}
+
+hitable *earth() {
+    int nx, ny, nn;
+    //unsigned char *tex_data = stbi_load("tiled.jpg", &nx, &ny, &nn, 0);
+    unsigned char *tex_data = stbi_load("earthmap.jpeg", &nx, &ny, &nn, 0);
+    material *mat =  new lambertian(new image_texture(tex_data, nx, ny));
+    return new sphere(vec3(0,0,2), 4, mat);
+}
+
+hitable_list* two_spheres()
+{
+//    texture* checker = new checker3d_texture(new constant_texture(vec3(0.2,0.3,0.1)),
+//                                           new constant_texture(vec3(0.9, 0.9, 0.9)));
+
+    texture* pertext = new noise_texture(2.0);
+
+    int n = 50;
+    hitable** list = new hitable*[n+1];
+    list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(pertext));
+    list[1] = new sphere(vec3(0, 5, 0), 5, new lambertian(pertext));
+
+    return new hitable_list(list, 2);
 }
 
 hitable *random_scene() {
     int n = 500;
     hitable **list = new hitable*[n+1];
-    list[0] =  new sphere(vec3(0,-1000,0), 1000, new lambertian(vec3(0.5, 0.5, 0.5)));
+//    list[0] =  new sphere(vec3(0,-1000,0), 1000, new lambertian(vec3(0.5, 0.5, 0.5)));
+
+    texture* checker = new checker_texture(new constant_texture(vec3(0.2,0.3,0.1)),
+                                           new constant_texture(vec3(0.9, 0.9, 0.9)));
+    list[0] =  new sphere(vec3(0,-1000,0), 1000, new lambertian( checker ));
+
     int i = 1;
 
     for (int a = -11; a < 11; a++)
@@ -51,7 +98,7 @@ hitable *random_scene() {
                 {  // diffuse
                     list[i++] = new moving_sphere(center, center + vec3(0, 0.2 * drand48(), 0),
                                                   0.0, 1.0, 0.2,
-                                                  new lambertian(vec3(drand48()*drand48(),drand48()*drand48(),drand48()*drand48())));
+                                                  new lambertian(new constant_texture(vec3(drand48()*drand48(),drand48()*drand48(),drand48()*drand48()))));
                 }
                 else if (choose_mat < 0.95)
                 { // metal
@@ -67,38 +114,36 @@ hitable *random_scene() {
     }
 
     list[i++] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
-    list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new lambertian(vec3(0.4, 0.2, 0.1)));
+    list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new lambertian(new constant_texture(vec3(0.4, 0.2, 0.1))));
     list[i++] = new sphere(vec3(4, 1, 0), 1.0, new metal(vec3(0.7, 0.6, 0.5), 0.0));
 
     return new bvh_node(list, i, 0.0, 1.0);
-//    return new hitable_list(list,i);
 }
 
 int main()
 {
-    int nx = 400;
-    int ny = 200;
-    int ns = 50;
+    int nx = 640;   //1920;
+    int ny = 400;   //1080;
+    int ns = 50;    //200;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
-    hitable* list[6];
-    list[0] = new sphere(vec3(0,0,0), 0.5, new lambertian(vec3(0.8f, 0.3f, 0.3f)));
-    list[1] = new sphere(vec3(0,-100.5,0), 100, new lambertian(vec3(0.5f, 0.5f, 0.5f)));
-    list[2] = new sphere(vec3(1,0,0), 0.5, new metal(vec3(0.8f, 0.6f, 0.2f), 0.3));
-    list[3] = new sphere(vec3(-1,0,0), 0.5, new dielectric(1.5));
-    list[4] = new sphere(vec3(-2,0,0), 0.5, new metal(vec3(0.8f, 0.6f, 0.2f), 0.3));
-    list[5] = new sphere(vec3(2,0,0), 0.5, new dielectric(1.5));
-    hitable* world = new hitable_list(list, 6);
+    hitable* world;
 
-    world = random_scene();
+    // pick which scene
+//    world = random_scene();
+//    world = two_spheres();
+    world = earth();
 
+    // set up camera
     vec3 lookfrom(13,2,3);
     vec3 lookat(0,0.5,0);
     float dist_to_focus = 10;
     float aperture = 0.0;
 
-    camera cam(lookfrom, lookat, vec3(0,1,0), 15, float(nx)/float(ny), aperture, dist_to_focus, 0.0, 1.0);
+//    camera cam(lookfrom, lookat, vec3(0,1,0), 15, float(nx)/float(ny), aperture, dist_to_focus, 0.0, 1.0);
+    camera cam(lookfrom, lookat, vec3(0,1,0), 30, float(nx)/float(ny), aperture, dist_to_focus, 0.0, 1.0);
 
+    // render
     for(int j = ny-1 ; j >= 0 ; j--)
     {
         for(int i = 0 ; i < nx ; i++)
