@@ -31,4 +31,6 @@ HEADERS += \
     texture.h \
     perlin.h \
     surface_texture.h \
-    stb_image.h
+    stb_image.h \
+    aarect.h \
+    box.h
