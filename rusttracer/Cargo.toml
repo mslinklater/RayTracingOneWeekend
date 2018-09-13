@@ -1,0 +1,6 @@
+[package]
+name = "rusttracer"
+version = "0.1.0"
+authors = ["Martin Linklater <mslinklater@gmail.com>"]
+
+[dependencies]

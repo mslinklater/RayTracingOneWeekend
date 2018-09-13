@@ -155,7 +155,7 @@ int main()
 {
     int nx = 1920;
     int ny = 1080;
-    int ns = 250;
+    int ns = 1000;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
     hitable* world;
